@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f0d0d6c9024ea6695e6f0aab923d50c3",
+    "content-hash": "c963608b43b29549b289a0b6620bc4ac",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1284,6 +1284,72 @@
             "time": "2021-01-18T20:58:21+00:00"
         },
         {
+            "name": "lightsaml/lightsaml",
+            "version": "2.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lightSAML/lightSAML.git",
+                "reference": "db0a0ef1f4f968ad34b8a06a395f10eb4bf5a402"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lightSAML/lightSAML/zipball/db0a0ef1f4f968ad34b8a06a395f10eb4bf5a402",
+                "reference": "db0a0ef1f4f968ad34b8a06a395f10eb4bf5a402",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.5",
+                "robrichards/xmlseclibs": "~2.0|~3.0|~4.0",
+                "symfony/event-dispatcher": "~5.0",
+                "symfony/http-foundation": "~5.0"
+            },
+            "require-dev": {
+                "monolog/monolog": "^2.0.0",
+                "phpunit/phpunit": "^8.4",
+                "pimple/pimple": "~3.0",
+                "symfony/css-selector": "~5.0",
+                "symfony/dom-crawler": "~5.0"
+            },
+            "suggest": {
+                "lightsaml/sp-bundle": "Symfony 2 SP security bundle",
+                "lightsaml/symfony-bridge": "Symfony 2 build container bridge"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "LightSaml\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Milos Tomic",
+                    "email": "tmilos@gmail.com",
+                    "homepage": "https://github.com/tmilos/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Light SAML 2.0 PHP library",
+            "homepage": "https://www.lightsaml.com/",
+            "keywords": [
+                "SAML 2.0",
+                "Single Logout",
+                "Single SignOn",
+                "library",
+                "lightSAML",
+                "php"
+            ],
+            "support": {
+                "docs": "http://www.lightsaml.com/LightSAML-Core/",
+                "issues": "https://github.com/lightsaml/lightsaml/issues",
+                "source": "https://github.com/lightSAML/lightSAML"
+            },
+            "time": "2021-04-07T21:26:54+00:00"
+        },
+        {
             "name": "monolog/monolog",
             "version": "2.3.2",
             "source": {
@@ -2316,6 +2382,48 @@
                 }
             ],
             "time": "2021-08-11T01:06:55+00:00"
+        },
+        {
+            "name": "robrichards/xmlseclibs",
+            "version": "3.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/robrichards/xmlseclibs.git",
+                "reference": "f8f19e58f26cdb42c54b214ff8a820760292f8df"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/robrichards/xmlseclibs/zipball/f8f19e58f26cdb42c54b214ff8a820760292f8df",
+                "reference": "f8f19e58f26cdb42c54b214ff8a820760292f8df",
+                "shasum": ""
+            },
+            "require": {
+                "ext-openssl": "*",
+                "php": ">= 5.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "RobRichards\\XMLSecLibs\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "A PHP library for XML Security",
+            "homepage": "https://github.com/robrichards/xmlseclibs",
+            "keywords": [
+                "security",
+                "signature",
+                "xml",
+                "xmldsig"
+            ],
+            "support": {
+                "issues": "https://github.com/robrichards/xmlseclibs/issues",
+                "source": "https://github.com/robrichards/xmlseclibs/tree/3.1.1"
+            },
+            "time": "2020-09-05T13:00:25+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
