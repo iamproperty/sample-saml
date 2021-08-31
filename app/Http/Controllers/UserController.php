@@ -11,6 +11,8 @@ class UserController extends Controller
         $validated = $this->validate($request, [
             'id' => 'required',
             'email' => 'sometimes|email',
+            'given_name' => 'sometimes',
+            'surname' => 'sometimes',
         ]);
 
         $request->session()->put('user', (object)$validated);

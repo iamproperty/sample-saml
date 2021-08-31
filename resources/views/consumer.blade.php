@@ -1,0 +1,21 @@
+@extends('layout')
+@section('content')
+    <div class="row mt-3">
+        <p>These values are extracted from the SAML Response sent from the IdP to the SP.</p>
+        @if($binding instanceof \LightSaml\Binding\HttpRedirectBinding)
+            <p>This used the HTTP Redirect Binding</p>
+        @elseif ($binding instanceof \LightSaml\Binding\HttpPostBinding)
+            <p>This used the HTTP POST Binding</p>
+        @endif
+        <dl>
+            <dt>Subject</dt>
+            <dd>{{ $subject->getNameID()->getValue() }}</dd>
+            <dt>Email</dt>
+            <dd>{{ optional($attributes->getFirstAttributeByName(\LightSaml\ClaimTypes::EMAIL_ADDRESS))->getFirstAttributeValue() }}</dd>
+            <dt>Given name</dt>
+            <dd>{{ optional($attributes->getFirstAttributeByName(\LightSaml\ClaimTypes::GIVEN_NAME))->getFirstAttributeValue() }}</dd>
+            <dt>Surname</dt>
+            <dd>{{ optional($attributes->getFirstAttributeByName(\LightSaml\ClaimTypes::SURNAME))->getFirstAttributeValue() }}</dd>
+        </dl>
+    </div>
+@endsection
