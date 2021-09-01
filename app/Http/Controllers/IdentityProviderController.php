@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use DateTime;
 use Illuminate\Auth\GenericUser;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use LightSaml\ClaimTypes;
 use LightSaml\Context\Profile\MessageContext;
 use LightSaml\Helper;
@@ -34,6 +35,7 @@ class IdentityProviderController extends SAMlController
         $binding = $this->getBindingFactory()->getBindingByRequest($request);
         $binding->receive($request, $messageContext = new MessageContext());
 
+        Log::info('Message received by Identity Provider');
         /** @var AuthnRequest $authnRequest */
         $authnRequest = $messageContext->getMessage();
 
@@ -43,8 +45,10 @@ class IdentityProviderController extends SAMlController
             ->setDestination($authnRequest->getAssertionConsumerServiceURL())
             ->setIssuer(new Issuer('idp'));
 
+        Log::info('Trying to verify AuthnRequest signature');
         // If the request is signed try to verify the signature
         if ($authnRequest->getSignature() && !$this->signatureMatches($authnRequest)) {
+            Log::info('No credential matches signature, sending error response');
             // No credential matching the signature was found, so respond to the SP with an error
             $response->setStatus(
                 new Status(
@@ -60,6 +64,7 @@ class IdentityProviderController extends SAMlController
         $response->addAssertion($assertion = new Assertion())
             ->setStatus((new Status)->setSuccess());
 
+        Log::info('Adding user information to assertion');
         $assertion
             ->setId(Helper::generateID())
             ->setIssueInstant(new DateTime())
@@ -97,12 +102,14 @@ class IdentityProviderController extends SAMlController
                     )
             );
 
+        Log::info('Sending response');
         // Send the response with the binding type requested in the Authn Request
         return $this->sendMessage($response, $authnRequest->getProtocolBinding());
     }
 
     public function initiate(Request $request)
     {
+        Log::info('Beginning IdP initiated login');
         // Get the fake user from the session. This would normally use the Laravel auth guard.
         $user = new GenericUser((array)$request->session()->get('user'));
 
@@ -116,6 +123,7 @@ class IdentityProviderController extends SAMlController
             ->setDestination(action('ServiceProviderController@consumer'))
             ->setIssuer(new Issuer('idp'));
 
+        Log::info('Adding user information to assertion');
         $assertion
             ->setId(Helper::generateID())
             ->setIssueInstant(new DateTime())
@@ -156,6 +164,7 @@ class IdentityProviderController extends SAMlController
         // Try to sign the response using stored credentials for the identity provider
         $this->tryToSignMessage($response, ...$this->getCredentialByEntityId('idp'));
 
+        Log::info('Sending response');
         // Send the response using the HTTP Redirect Binding
         return $this->sendMessage($response, SamlConstants::BINDING_SAML2_HTTP_REDIRECT);
     }

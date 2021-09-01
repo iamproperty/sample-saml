@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use LightSaml\Binding\BindingFactory;
 use LightSaml\Build\Container\BuildContainerInterface;
 use LightSaml\Context\Profile\MessageContext;
@@ -34,10 +35,14 @@ abstract class SAMLController extends Controller
      */
     protected function getCredentialByEntityId(string $entityId): array
     {
-        return $this->samlContainer
+        Log::debug("Looking for credentials for entity ID: $entityId");
+        $credentials = $this->samlContainer
             ->getCredentialContainer()
             ->getCredentialStore()
             ->getByEntityId($entityId);
+        Log::debug(sprintf('Found %d credential(s) for entity ID: %s', count($credentials), $entityId));
+
+        return $credentials;
     }
 
     protected function tryToSignMessage(SamlMessage $message, CredentialInterface ...$credentials): void
@@ -45,9 +50,11 @@ abstract class SAMLController extends Controller
         foreach ($credentials as $credential) {
             // If any credential is an X509 credential sign the request
             if ($credential instanceof X509CredentialInterface) {
+                Log::info('Signing message with credential: '.json_encode($credential->getKeyNames()));
                 $message->setSignature(new SignatureWriter($credential->getCertificate(), $credential->getPrivateKey()));
                 return;
             }
+            Log::debug('Credential not suitable for signing');
         }
     }
 
@@ -85,10 +92,12 @@ abstract class SAMLController extends Controller
             try {
                 if ($signature->validate($credential->getPublicKey())) {
                     // The signature has been validated
+                    Log::debug('Message signature matches credential: '.json_encode($credential->getKeyNames()));
                     return true;
                 }
             } catch (LightSamlSecurityException $e) {
                 // The credential didn't match the signature, but another might
+                Log::debug("Message signature didn't match credential: ".json_encode($credential->getKeyNames()));
             }
         }
 
