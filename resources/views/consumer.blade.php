@@ -8,6 +8,7 @@
             <p>This used the HTTP POST Binding</p>
         @endif
         <dl>
+        @if($status->isSuccess())
             <dt>Subject</dt>
             <dd>{{ $subject->getNameID()->getValue() }}</dd>
             <dt>Email</dt>
@@ -16,6 +17,12 @@
             <dd>{{ optional($attributes->getFirstAttributeByName(\LightSaml\ClaimTypes::GIVEN_NAME))->getFirstAttributeValue() }}</dd>
             <dt>Surname</dt>
             <dd>{{ optional($attributes->getFirstAttributeByName(\LightSaml\ClaimTypes::SURNAME))->getFirstAttributeValue() }}</dd>
+        @else
+            <dt>Status code</dt>
+            <dd>{{ $status->getStatusCode()->getValue() }}</dd>
+            <dt>Status message</dt>
+            <dd>{{ $status->getStatusMessage() }}</dd>
+        @endif
         </dl>
     </div>
 @endsection

@@ -21,10 +21,13 @@ class ServiceProviderController extends SAMLController
             ->setID(Helper::generateID())
             ->setIssueInstant(new DateTime())
             ->setDestination(action('IdentityProviderController@respond'))
-            ->setIssuer(new Issuer(url('/sp')));
+            ->setIssuer(new Issuer('sp'));
+
+        // Try to sign the request using stored credentials for the service provider
+        $this->tryToSignMessage($authnRequest, ...$this->getCredentialByEntityId('sp'));
 
         // Use the Redirect binding to send the Authn Request to the Identity Provider
-        $redirectBinding = $this->samlContainer->getBindingFactory()->create(SamlConstants::BINDING_SAML2_HTTP_REDIRECT);
+        $redirectBinding = $this->getBindingFactory()->create(SamlConstants::BINDING_SAML2_HTTP_REDIRECT);
 
         return $redirectBinding->send((new MessageContext())->setMessage($authnRequest));
     }
@@ -32,16 +35,21 @@ class ServiceProviderController extends SAMLController
     public function consumer(Request $request)
     {
         // Deserialise the SAML XML message from the redirect or POST binding
-        $binding = $this->samlContainer->getBindingFactory()->getBindingByRequest($request);
+        $binding = $this->getBindingFactory()->getBindingByRequest($request);
         $binding->receive($request, $messageContext = new MessageContext());
 
         /** @var Response $response */
         $response = $messageContext->getMessage();
 
         // Extract information from the response
-        $subject = $response->getFirstAssertion()->getSubject();
-        $attributes = $response->getFirstAssertion()->getFirstAttributeStatement();
+        $attributes = null;
+        $subject = null;
+        $status = $response->getStatus();
+        if ($status->isSuccess()) {
+            $subject = $response->getFirstAssertion()->getSubject();
+            $attributes = $response->getFirstAssertion()->getFirstAttributeStatement();
+        }
 
-        return view('consumer', compact('attributes', 'binding', 'subject'));
+        return view('consumer', compact('attributes', 'binding', 'status', 'subject'));
     }
 }

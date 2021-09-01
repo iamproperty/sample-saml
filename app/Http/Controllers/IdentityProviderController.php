@@ -31,21 +31,34 @@ class IdentityProviderController extends SAMlController
         $user = new GenericUser((array)$request->session()->get('user'));
 
         // Deserialise the SAML XML message from the redirect or POST binding
-        $binding = $this->samlContainer->getBindingFactory()->getBindingByRequest($request);
+        $binding = $this->getBindingFactory()->getBindingByRequest($request);
         $binding->receive($request, $messageContext = new MessageContext());
 
         /** @var AuthnRequest $authnRequest */
         $authnRequest = $messageContext->getMessage();
 
         $response = (new Response())
-            ->addAssertion($assertion = new Assertion())
-            ->setStatus(new Status(
-                new StatusCode(SamlConstants::STATUS_SUCCESS)
-            ))
             ->setID(Helper::generateID())
             ->setIssueInstant(new DateTime())
             ->setDestination($authnRequest->getAssertionConsumerServiceURL())
-            ->setIssuer(new Issuer(url('/idp')));
+            ->setIssuer(new Issuer('idp'));
+
+        // If the request is signed try to verify the signature
+        if ($authnRequest->getSignature() && !$this->signatureMatches($authnRequest)) {
+            // No credential matching the signature was found, so respond to the SP with an error
+            $response->setStatus(
+                new Status(
+                    new StatusCode(SamlConstants::STATUS_REQUESTER),
+                    'Unable to verify signature'
+                )
+            );
+
+            // Send the response with the binding type requested in the Authn Request
+            return $this->sendMessage($response, $authnRequest->getProtocolBinding());
+        }
+
+        $response->addAssertion($assertion = new Assertion())
+            ->setStatus((new Status)->setSuccess());
 
         $assertion
             ->setId(Helper::generateID())
@@ -84,10 +97,8 @@ class IdentityProviderController extends SAMlController
                     )
             );
 
-        // Get the binding type requested in the Authn Request
-        $responseBinding = $this->samlContainer->getBindingFactory()->create($authnRequest->getProtocolBinding());
-
-        return $responseBinding->send((new MessageContext())->setMessage($response));
+        // Send the response with the binding type requested in the Authn Request
+        return $this->sendMessage($response, $authnRequest->getProtocolBinding());
     }
 
     public function initiate(Request $request)
@@ -103,7 +114,7 @@ class IdentityProviderController extends SAMlController
             ->setID(Helper::generateID())
             ->setIssueInstant(new DateTime())
             ->setDestination(action('ServiceProviderController@consumer'))
-            ->setIssuer(new Issuer(url('/idp')));
+            ->setIssuer(new Issuer('idp'));
 
         $assertion
             ->setId(Helper::generateID())
@@ -142,9 +153,10 @@ class IdentityProviderController extends SAMlController
                     )
             );
 
-        // Get the binding type requested in the Authn Request
-        $responseBinding = $this->samlContainer->getBindingFactory()->create(SamlConstants::BINDING_SAML2_HTTP_REDIRECT);
+        // Try to sign the response using stored credentials for the identity provider
+        $this->tryToSignMessage($response, ...$this->getCredentialByEntityId('idp'));
 
-        return $responseBinding->send((new MessageContext())->setMessage($response));
+        // Send the response using the HTTP Redirect Binding
+        return $this->sendMessage($response, SamlConstants::BINDING_SAML2_HTTP_REDIRECT);
     }
 }

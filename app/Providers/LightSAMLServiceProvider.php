@@ -4,9 +4,12 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use LightSaml\Binding\BindingFactory;
+use LightSaml\Build\Container\BuildContainerInterface;
+use LightSaml\Build\Container\CredentialContainerInterface;
 use LightSaml\Build\Container\ServiceContainerInterface;
-use LightSaml\Event\Events;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use LightSaml\Store\Credential\CompositeCredentialStore;
+use LightSaml\Store\Credential\CredentialStoreInterface;
+use LightSaml\Store\Credential\X509FileCredentialStore;
 
 class LightSAMLServiceProvider extends ServiceProvider
 {
@@ -70,6 +73,56 @@ class LightSAMLServiceProvider extends ServiceProvider
                 }
 
             };
+        });
+        $this->app->bind(BuildContainerInterface::class, function () {
+            return new class implements BuildContainerInterface {
+                public function getSystemContainer()
+                {
+                    // TODO: Implement getSystemContainer() method.
+                }
+
+                public function getPartyContainer()
+                {
+                    // TODO: Implement getPartyContainer() method.
+                }
+
+                public function getStoreContainer()
+                {
+                    // TODO: Implement getStoreContainer() method.
+                }
+
+                public function getProviderContainer()
+                {
+                    // TODO: Implement getProviderContainer() method.
+                }
+
+                public function getCredentialContainer()
+                {
+                    return new class implements CredentialContainerInterface {
+                        public function getCredentialStore()
+                        {
+                            return app(CredentialStoreInterface::class);
+                        }
+                    };
+                }
+
+                public function getServiceContainer()
+                {
+                    return app(ServiceContainerInterface::class);
+                }
+
+                public function getOwnContainer()
+                {
+                    // TODO: Implement getOwnContainer() method.
+                }
+            };
+        });
+        $this->app->bind(CredentialStoreInterface::class, function () {
+            $store = new CompositeCredentialStore();
+            $store->add(new X509FileCredentialStore('sp', storage_path('app/saml/credentials/sp.crt'), storage_path('app/saml/credentials/sp.pem'), null));
+            $store->add(new X509FileCredentialStore('idp', storage_path('app/saml/credentials/idp.crt'), storage_path('app/saml/credentials/idp.pem'), null));
+
+            return $store;
         });
     }
 
