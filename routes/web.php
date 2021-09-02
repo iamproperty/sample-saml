@@ -13,6 +13,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::view('/', 'home');
+// Store and remove a fake user for the Identity Provider
+Route::post('/user', 'UserController@store');
+Route::delete('/user', 'UserController@destroy');
+
+Route::get('/idp/respond', 'IdentityProviderController@respond');
+Route::get('/idp/initiate', 'IdentityProviderController@initiate');
+
+Route::get('/sp/initiate', 'ServiceProviderController@initiate');
+Route::get('/sp/consumer', 'ServiceProviderController@consumer');
+Route::post('/sp/consumer', 'ServiceProviderController@consumer');
