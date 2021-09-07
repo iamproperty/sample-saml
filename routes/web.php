@@ -18,9 +18,11 @@ Route::view('/', 'home');
 Route::post('/user', 'UserController@store');
 Route::delete('/user', 'UserController@destroy');
 
+Route::get('/idp/metadata', 'MetadataController@idp');
 Route::get('/idp/respond', 'IdentityProviderController@respond');
 Route::get('/idp/initiate', 'IdentityProviderController@initiate');
 
+Route::get('/sp/metadata', 'MetadataController@sp');
 Route::get('/sp/initiate', 'ServiceProviderController@initiate');
 Route::get('/sp/consumer', 'ServiceProviderController@consumer');
 Route::post('/sp/consumer', 'ServiceProviderController@consumer');

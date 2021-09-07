@@ -10,6 +10,7 @@ use LightSaml\Context\Profile\MessageContext;
 use LightSaml\Credential\CredentialInterface;
 use LightSaml\Credential\X509CredentialInterface;
 use LightSaml\Error\LightSamlSecurityException;
+use LightSaml\Model\AbstractSamlModel;
 use LightSaml\Model\Context\SerializationContext;
 use LightSaml\Model\Protocol\SamlMessage;
 use LightSaml\Model\XmlDSig\SignatureWriter;
@@ -73,7 +74,7 @@ abstract class SAMLController extends Controller
      *
      * This is only needed for debugging.
      */
-    protected function serialise(SamlMessage $message): Response
+    protected function serialise(AbstractSamlModel $message): Response
     {
         $serializationContext = new SerializationContext();
         $message->serialize($serializationContext->getDocument(), $serializationContext);
